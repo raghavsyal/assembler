@@ -127,9 +127,15 @@ def assembler(instructions,function_opcodes,reg_binary,label_dict):
                     print("Error: Unknown opcode:", opcode)
                     continue
                 elif type == 'R':
+                    if i == len(instructions) - 1:
+                        print("Virtual Halt error")
+                        continue 
                     dest_reg,source_reg1,source_reg2 = rest.split(",")
                     binary_rep = function_call[type](reg_binary[dest_reg],reg_binary[source_reg1],reg_binary[source_reg2],func_code3,func_code7,op)
                 elif type == "I":
+                    if i == len(instructions) - 1:
+                        print("Virtual Halt error")
+                        continue 
                     if opcode == "lw":       #different formatting for lw     #lw a5,20(s1)
                         address_reg, rem = rest.split(",")
                         imm,source_reg1 = rem.split("(",1)
@@ -137,7 +143,10 @@ def assembler(instructions,function_opcodes,reg_binary,label_dict):
                     else:
                         address_reg,source_reg1,imm = rest.split(",")
                     binary_rep = function_call[type](reg_binary[address_reg],reg_binary[source_reg1],imm,func_code3,op)
-                elif type == "S":                
+                elif type == "S": 
+                    if i == len(instructions) - 1:
+                        print("Virtual Halt error")
+                        continue                
                     data_reg, rem = rest.split(",")
                     imm,source_reg = rem.split("(",1)
                     source_reg = source_reg[:-1]
@@ -150,11 +159,21 @@ def assembler(instructions,function_opcodes,reg_binary,label_dict):
                         string = (cnt*4) - int(label_dict.get(imm))
                         imm = str(string)
                     finally:
+                        if source_reg1 == 0 and source_reg2 == 0 and imm == '0' and i != len(instructions) - 1:
+                            #binary_rep = function_call[type](reg_binary[source_reg1],reg_binary[source_reg2],imm,func_code3,op)
+                            print("Virtual Halt error")
+                            continue
                         binary_rep = function_call[type](reg_binary[source_reg1],reg_binary[source_reg2],imm,func_code3,op)
                 elif type == "U":
+                    if i == len(instructions) - 1:
+                        print("Virtual Halt error")
+                        continue 
                     dest_reg,imm = rest.split(",")
                     binary_rep = function_call[type](reg_binary[dest_reg],imm,op)
                 elif type == "J":
+                    if i == len(instructions) - 1:
+                        print("Virtual Halt error")
+                        continue 
                     dest_reg,imm = rest.split(",")
                     binary_rep = function_call[type](reg_binary[dest_reg],imm,op)
                 else:
