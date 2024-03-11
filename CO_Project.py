@@ -85,6 +85,7 @@ def U(rd, imm, opc):
         return num
    num = num[::-1]
    num = num[12:]
+   num=num[::-1]
    str1 = num + str(rd) + str(opc)
    return str1
 
