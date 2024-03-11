@@ -1,7 +1,3 @@
-#assuming every input is string input, if not please change int to str
-#labels still need to be handled (maybe need to replace for loop with while loop for that and store the index of the label)
-#but in B type instructions so maybe labels arent considered(check with TA)
-
 def binary_conversion(number):
     if number >= 0:
         q = number
@@ -79,7 +75,6 @@ def B(rs1, rs2, imm, f3, opc):                                   #0000 0000 0000
     num2 = num[1:5] + num[11]
     num2 = num2[::-1]
     str1 = num1 + str(rs2) + str(rs1) + str(f3) + num2 + str(opc)
-    print(str1)
     return str1
 
 def U(rd, imm, opc):
@@ -101,7 +96,8 @@ def J(rd, imm, opc):
     str1 = num + str(rd) + str(opc)
     return str1
 
-def assembler(instructions,function_opcodes,reg_binary):
+def assembler(instructions,function_opcodes,reg_binary,label_dict):
+    cnt = -1
     function_call = {
         'R' : R,
         'I' : I,
@@ -111,6 +107,7 @@ def assembler(instructions,function_opcodes,reg_binary):
         'J' : J
     }
     with open('outputfinal.txt', 'w') as f:
+        cnt += 1
         for i in instructions:
             if not i.strip():      #skipping empty line
                 continue
@@ -132,19 +129,25 @@ def assembler(instructions,function_opcodes,reg_binary):
                 elif type == "I":
                     if opcode == "lw":       #different formatting for lw     #lw a5,20(s1)
                         address_reg, rem = rest.split(",")
-                        source_reg1 = rem[len(rem)-3:len(rem)-1] 
-                        imm = rem[0:len(rem)-4]
+                        imm,source_reg1 = rem.split("(",1)
+                        source_reg1 = source_reg1[:-1]
                     else:
                         address_reg,source_reg1,imm = rest.split(",")
                     binary_rep = function_call[type](reg_binary[address_reg],reg_binary[source_reg1],imm,func_code3,op)
-                elif type == "S":
+                elif type == "S":                
                     data_reg, rem = rest.split(",")
-                    source_reg = rem[len(rem)-3:len(rem)-1] 
-                    imm = rem[0:len(rem)-4]
+                    imm,source_reg = rem.split("(",1)
+                    source_reg = source_reg[:-1]
                     binary_rep = function_call[type](reg_binary[data_reg],reg_binary[source_reg],imm,func_code3,op)
                 elif type == "B":
                     source_reg1,source_reg2,imm = rest.split(",")
-                    binary_rep = function_call[type](reg_binary[source_reg1],reg_binary[source_reg2],imm,func_code3,op)
+                    try:
+                        a = int(imm)
+                    except:
+                        string = (cnt*4) - int(label_dict.get(imm))
+                        imm = str(string)
+                    finally:
+                        binary_rep = function_call[type](reg_binary[source_reg1],reg_binary[source_reg2],imm,func_code3,op)
                 elif type == "U":
                     dest_reg,imm = rest.split(",")
                     binary_rep = function_call[type](reg_binary[dest_reg],imm,op)
@@ -167,8 +170,16 @@ instructions = []      #to be taken from text file
 with open('input.txt', 'r') as file:
     instructions = file.readlines()  
     for i in  range(len(instructions)-1):
-        instructions[i]=instructions[i][:-1]
-    print(instructions)
+        instructions[i] = instructions[i][:-1]
+        instructions[i] = instructions[i].strip()
+    label_dict = {}
+    pc = -1
+    for i in range(len(instructions)):
+        pc += 1
+        if ':' in instructions[i]:
+            label,instruction=instructions[i].split(":",1)
+            instructions[i] = instruction.lstrip()
+            label_dict[label] = pc*4
 
 
 opcodes_dict = { 
@@ -203,7 +214,7 @@ opcodes_dict = {
 }
 
 register_dict = { 
-    'x0':'00000',  
+    'zero':'00000',  
     'ra':'00001', 
     'sp':'00010',    
     'gp':'00011',
@@ -237,5 +248,4 @@ register_dict = {
     't6':'11111',
 }
     
-assembler(instructions,opcodes_dict, register_dict)
-            
+assembler(instructions,opcodes_dict, register_dict,label_dict)
