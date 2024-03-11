@@ -1,5 +1,10 @@
 def binary_conversion(number):
     if number >= 0:
+        if number>(2**31)-1:
+            print("Number out of Range")
+            s='-1'
+            return s
+
         q = number
         s = ""
         while q != 0:
@@ -8,13 +13,14 @@ def binary_conversion(number):
             q = q//2
         s = s[::-1]
         filler = 32 - len(s)
-        if filler < 0:
-            print("Number out of Range")
-            s='-1'
-            return s
+        
         s = filler*"0" + s
         return s
     else:
+        if abs(number)>(2**31):
+            print("Number out of Range")
+            s='-1'
+            return s
         z = abs(number)
         s = ""
         cnt = 1
@@ -29,10 +35,6 @@ def binary_conversion(number):
             q = q//2
         s = s[::-1]
         filler = 32 - len(s)
-        if filler < 0:
-            print("Number out of Range")
-            s='-1'
-            return s
         s = filler*"1" + s
         return s
 
