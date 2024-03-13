@@ -1,3 +1,4 @@
+import sys
 def binary_conversion(number):
     if number >= 0:
         if number>(2**31)-1:
@@ -109,7 +110,7 @@ def assembler(instructions,function_opcodes,reg_binary,label_dict):
         'U' : U,
         'J' : J
     }
-    with open('outputfinal.txt', 'w') as f:
+    with open(output, 'w') as f:
         cnt += 1
         for i in instructions:
             if not i.strip():      #skipping empty line
@@ -189,7 +190,9 @@ def assembler(instructions,function_opcodes,reg_binary,label_dict):
                 continue
             
 instructions = []      #to be taken from text file
-with open('input.txt', 'r') as file:
+input = sys.argv[1]
+output = sys.argv[2]
+with open(input, 'r') as file:
     instructions = file.readlines()  
     for i in  range(len(instructions)-1):
         instructions[i] = instructions[i][:-1]
