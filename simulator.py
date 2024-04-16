@@ -1,4 +1,3 @@
-
 def sext(imm):
     if imm[0] == 0:
         while len(imm)<32 :
@@ -7,7 +6,44 @@ def sext(imm):
     while len(imm) < 32:
         imm = '1' + imm
     return imm
-
+def decimaltobinary(num):
+    num=int(num)
+    if num >= 0:
+        a = num
+        s = ""
+        while a != 0:
+            b = a%2
+            s = s + str(b)
+            a = a//2
+        s = s[::-1]
+        filler = 32 - len(s)
+        if filler < 0:
+            print("number out of Range")
+            s='-1'
+            return s
+        s = filler*"0" + s
+        return s
+    else:
+        z = abs(num)
+        s = ""
+        cnt = 1
+        temp = z
+        while temp != 0:
+            cnt += 1
+            temp = temp//2
+        a = (2**cnt) - z
+        while a != 0:
+            b = a%2
+            s = s + str(b)
+            a = a//2
+        s = s[::-1]
+        filler = 32 - len(s)
+        if filler < 0:
+            print("Number out of Range")
+            s='-1'
+            return s
+        s = filler*"1" + s
+        return s
 def signed_conversion(imm):
     if imm[0] == '1':
         flipped_bits = ''.join('1' if bit == '0' else '0' for bit in imm)
@@ -79,8 +115,47 @@ def B(i, pc, reg_dic):
         pc = blt(reg_dic[rs1], reg_dic[rs2], imm, pc)
     if func3 == "101":
         pc = bge(reg_dic[rs1], reg_dic[rs2], imm, pc)
+    return pc
 
 def R(i, pc, reg_dict):
     #try to create this
+    ''''''
+
+def lw(rd, rs1, imm, pc, reg_dic, mem_dic):
+    rs1 = sext(rs1)
+    rs1 = signed_conversion(rs1)
+    imm = signed_conversion(imm)               #check for rs1 + imm overflow
+    reg_dic[rd] = mem_dic[rs1+imm]             #if binary value not 32 bits, you need to sign extend
+    return pc + 4
+def addi(rd, rs1, imm, pc):
+    rs1 = sext(rs1)
+    rs1 = signed_conversion(rs1)
+    imm = signed_conversion(imm)
+    reg_dic[rd] = decimaltobinary(rs1 + imm)   #check for rs1 + imm overflow
+    return pc + 4
+
+def jalr(rd, x6, imm, pc):
+    reg_dic[rd] = pc + 4
+    x6 = sext(x6)
+    x6 = signed_conversion(x6)
+    imm = signed_conversion(imm)
+    pc += decimaltobinary(x6 + imm)            #check for rs1 + imm overflow
+    pc = pc[:-1] + "0"
+    return pc 
+
+def I(i, pc, reg_dict, mem_dic):
+    imm = i[:12]
+    imm = sext(imm)
+    rd = i[-11:-6]
+    rs1 = i[-19:-14] 
+    func3 = i[-14:-11]
+    opcode = i[-6:]
+    if (func3 == "010") and (opcode == "0000011"):
+        pc = lw(rd, reg_dic[rs1], imm, pc, reg_dic, mem_dic)
+    if func3 == "000" and (opcode == "0010011"):
+        pc = addi(rd, reg_dic[rs1], imm, pc)
+    if func3 == "000" and (opcode == "1100111"):
+        pc = jalr(rd, reg_dic[rs1], imm, pc)
 
 reg_dic = {}
+mem_dic = {}
