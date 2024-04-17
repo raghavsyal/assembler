@@ -164,4 +164,40 @@ reg_dic = {'x0': "0"*16, 'x1': "0"*16, 'x2': "0"*16, 'x3': "0"*16, 'x4': "0"*16,
            'x17': "0"*16, 'x18': "0"*16, 'x19': "0"*16, 'x20': "0"*16, 'x21': "0"*16, 'x22': "0"*16, 'x23': "0"*16,'x24': "0"*16, 
            'x25': "0"*16, 'x26': "0"*16, 'x27': "0"*16, 'x28': "0"*16, 'x29': "0"*16, 'x30': "0"*16, 'x31': "0"*16}
 
-mem_dic = {}
+program_memory = {}
+stack_memory = {}
+data_memory = {}
+
+# Program Memory
+for i in range(256):
+    address = f"{i:04X}"  
+    program_memory[address] = '0' * 8  
+
+# Stack Memory
+for i in range(32):
+    #stack_address = 0x100 - (i * 4)     
+    address = f'0x{int(256 + i * 4):04X}'  
+    stack_memory[address] = '0' * 8  
+
+last_address = '0x017F'
+stack_memory[last_address] = '0' * 8
+
+# Data Memory
+for i in range(32):
+    #data_address = 0x1000 + (i * 4)   
+    address = f'0x{int(0x00100000 + i * 4):08X}'  
+    data_memory[address] = '0' * 8
+    
+# Set the last address manually to '0' * 8
+last_address = '0x0010007F'
+data_memory[last_address] = '0' * 8
+    
+print(program_memory)
+print(stack_memory)
+print(data_memory)
+
+mem_dict = {
+    **program_memory,
+    **stack_memory,
+    **data_memory
+}
